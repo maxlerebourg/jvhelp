@@ -11,43 +11,34 @@
 
 
 // LinkOpener
+const classLinkOpener = 'jvhelp-link-opener'
 const youtubeLinksSelector = 'a[href^="https://www.youtube.com/watch"], a[href^="https://m.youtube.com/watch"], a[href^="https://youtu.be"], a[href^="https://www.youtube.com/shorts"]'
 const twitterLinksSelector = 'a[href^="https://twitter.com/"], a[href^="https://x.com/"]'
 const tiktokLinksSelectors = 'a[href^="https://www.tiktok.com/"]'
 const defaultLinksSelector = 'a[href^="https://streamable.com/"], a[href^="https://webmshare.com/"], a[href^="https://vocaroo.com/"], a[href^="https://voca.ro/"]'
 
-function getTwitterUrl(tweetId) {
-  return `https://platform.twitter.com/embed/Tweet.html?dnt=false&amp;embedId=${tweetId}&amp;features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&amp;frame=false&amp;hideCard=false&amp;hideThread=false&amp;id=${tweetId}&amp;lang=fr&amp;origin=https%3A%2F%2Fpublish.twitter.com%2F%23&amp;theme=dark&amp;widgetsVersion=aaf4084522e3a%3A1674595607486&amp;width=550px`
-}
-function getTiktokUrl(tiktokId) {
-  return `https://www.tiktok.com/embed/v2/${tiktokId}?lang=fr`
-}
-function getYoutubeUrl(videoId, timestamp) {
-  return `https://www.youtube.com/embed/${videoId}?start=${timestamp?.replace('s', '') ?? '0'}`
-}
-
 function processIframe(linksElement, platform) {
   linksElement.forEach((l) => {
-    if (l.classList.contains('jvhelp')) return
-    l.classList.add("jvhelp")
+    if (l.classList.contains(classLinkOpener)) return
+    l.classList.add(classLinkOpener)
     let url;
     switch (platform) {
       case 'twitter':
-        const tweetIdArr = l.getAttribute("href").split('/')
+        const tweetIdArr = l.getAttribute('href').split('/')
         const tweetIdStatus = tweetIdArr.findIndex(i => i === 'status')
         if (tweetIdStatus === -1) return
         const tweetId = tweetIdArr[tweetIdStatus + 1].split('?')[0]
-        url = getTwitterUrl(tweetId)
+        url = `https://platform.twitter.com/embed/Tweet.html?dnt=false&amp;embedId=${tweetId}&amp;features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&amp;frame=false&amp;hideCard=false&amp;hideThread=false&amp;id=${tweetId}&amp;lang=fr&amp;origin=https%3A%2F%2Fpublish.twitter.com%2F%23&amp;theme=dark&amp;widgetsVersion=aaf4084522e3a%3A1674595607486&amp;width=550px`
         break
       case 'tiktok':
-        const tiktokUrl = l.getAttribute("href").split("/")
-        const video = tiktokUrl.findIndex(i => i === "video")
+        const tiktokUrl = l.getAttribute('href').split('/')
+        const video = tiktokUrl.findIndex(i => i === 'video')
         if (video === -1) return
-        const id = tiktokUrl[video + 1].split('?')[0]
-        url = getTiktokUrl(id)
+        const tiktokId = tiktokUrl[video + 1].split('?')[0]
+        url = `https://www.tiktok.com/embed/v2/${tiktokId}?lang=fr`
         break
       case 'youtube':
-        const youtubeUrl = l.getAttribute("href")
+        const youtubeUrl = l.getAttribute('href')
         const timestamp = youtubeUrl.match(/t=([^&]+)/)?.[1]
         let videoId
         timestamp
@@ -58,17 +49,17 @@ function processIframe(linksElement, platform) {
         } else if (youtubeUrl.indexOf('youtube.com/shorts/') !== -1) {
             videoId = youtubeUrl.split('youtube.com/shorts/')[1]
         }
-        url = getYoutubeUrl(videoId, timestamp)
-        console.log(videoId, timestamp, url)
+        url = `https://www.youtube.com/embed/${videoId}?start=${timestamp?.replace('s', '') ?? '0'}`
         break
       default:
-        url = l.getAttribute("href")
-          .replace("streamable.com/", "streamable.com/e/")
-          .replace("vocaroo.com/", "vocaroo.com/embed/")
-          .replace("voca.ro/", "vocaroo.com/embed/")
+        url = l.getAttribute('href')
+          .replace('streamable.com/', 'streamable.com/e/')
+          .replace('vocaroo.com/', 'vocaroo.com/embed/')
+          .replace('voca.ro/', 'vocaroo.com/embed/')
         break
-    }
-    l.insertAdjacentHTML("afterend", `
+      }
+      console.log(url)
+    l.insertAdjacentHTML('afterend', `
       <iframe
         class="iframe-jvhelp"
         width="100%"
@@ -83,16 +74,7 @@ function processIframe(linksElement, platform) {
 }
 function onLinkOpener() {
   if (!document.getElementById('jvhelp')) {
-    document.head.innerHTML = document.head.innerHTML + `
-      <style id="jvhelp">
-        .iframe-jvhelp {
-          border: none;
-          width: 100%;
-          max-width: 550px;
-          margin: 0 auto .9375rem;
-        }
-      </style>
-    `
+    document.head.innerHTML = document.head.innerHTML + `<style id="jvhelp">.iframe-jvhelp {border: none; max-width: 550px; margin: 0 auto .9375rem; }</style>`
   }
   const messages = document.getElementsByClassName(messageClass)
   for (let i = 0; i < messages.length; i += 1) {
@@ -158,21 +140,36 @@ function onNoReload() {
 
 
 // ImageOpener
-function onImgClick(event) {
+const tagImageOpener = 'jvhelp-image-opener'
+const classImageOpenerProcessed = 'jvhelp-image-opener'
+let imgDisplayed = false
+async function onImgClick(event) {
   event.stopPropagation()
   event.preventDefault()
+  if (imgDisplayed) return
+  imgDisplayed = true
   const element = document.createElement('img')
+  element.id = tagImageOpener
   element.setAttribute('style', 'cursor: pointer; position: fixed; z-index: 1999999988; top: 0; left: 0; object-fit: contain; padding: 3rem; width: 100%; height: 100%; background-color: rgba(0,0,0,.7);')
   element.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
-  element.addEventListener('click', () => document.body.removeChild(element))
+  element.addEventListener('click', async (evt) => {
+    evt.stopPropagation()
+    document.body.removeChild(document.getElementById(tagImageOpener))
+    await new Promise((res) => setTimeout(res, 200))
+    imgDisplayed = false
+  })
   document.body.appendChild(element)
+  await new Promise((res) => setTimeout(res, 200))
 }
 
 function onImageOpener() {
   const images = document.getElementsByTagName('img')
   for (let i = 0; i < images.length; i += 1) {
+    if (images[i].id === tagImageOpener || images[i].classList.contains(classImageOpenerProcessed)) {
+      continue
+    }
     if (images[i].src.includes('noelshack.com')) {
-      images[i].removeEventListener('click', onImgClick, false)
+      images[i].classList.add(classImageOpenerProcessed)
       images[i].addEventListener('click', onImgClick, false)
       images[i].style.cursor = 'pointer'
     }
