@@ -25,7 +25,6 @@ function processIframe(linksElement, platform) {
     if (l.closest('.signature-msg')) return
     if (l.classList.contains(tagLinkOpener)) return
     l.classList.add(tagLinkOpener)
-    console.log(l.getAttribute('href'))
     let url
     switch (platform) {
       case 'twitter': {
@@ -71,7 +70,6 @@ function processIframe(linksElement, platform) {
         break
       }
     }
-    console.log(url)
     l.insertAdjacentHTML('afterend', `
       <iframe
         class="iframe-jvhelp"
@@ -152,7 +150,6 @@ function onNoReload() {
 // ImageOpener
 const tagImageOpener = 'jvhelp-image-opener'
 const classImageOpenerProcessed = 'jvhelp-image-opener-processed'
-let imgDisplayed = false
 async function onImgClick(event) {
   event.stopPropagation()
   event.preventDefault()
