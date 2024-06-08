@@ -154,16 +154,24 @@ async function onImgClick(event) {
   event.stopPropagation()
   event.preventDefault()
   const element = document.createElement('img')
-  element.id = classImageOpenerProcessed
+  element.setAttribute('id', classImageOpenerProcessed)
   element.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
-  document.body.appendChild(element)
-  await new Promise((res) => setTimeout(res, 200))
-  element.addEventListener('click', () => document.body.removeChild(element))
+  const dialog = document.getElementById(tagImageOpener)
+  dialog.replaceChildren(element)
+  dialog.showModal()
 }
 
 function onImageOpener() {
-  if (!document.getElementById(tagImageOpener)) {
-    document.head.innerHTML = document.head.innerHTML + `<style id="${tagImageOpener}">#${classImageOpenerProcessed} { cursor: pointer; position: fixed; z-index: 1999999988; top: 0; left: 0; object-fit: contain; padding: 3rem; width: 100%; height: 100%; background-color: rgba(0,0,0,.7); }</style>`
+  const dialog = document.getElementById(tagImageOpener)
+  if (!dialog) {
+    document.body.innerHTML = document.body.innerHTML + `
+    <dialog id="${tagImageOpener}"></dialog>
+    <style>
+      #${tagImageOpener} { cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
+      #${classImageOpenerProcessed} { max-height: 80vh; max-width: 80vw; object-fit: contain; }
+    </style>`
+    const dialog = document.getElementById(tagImageOpener)
+    dialog.addEventListener('click', dialog.close, { capture: true, passive: true })
   }
   const images = document.getElementsByTagName('img')
   for (let i = 0; i < images.length; i += 1) {
@@ -171,7 +179,7 @@ function onImageOpener() {
     if (images[i].classList.contains(classImageOpenerProcessed)) continue
     if (!images[i].src.includes('noelshack.com')) continue
     images[i].classList.add(classImageOpenerProcessed)
-    images[i].addEventListener('click', onImgClick, false)
+    images[i].addEventListener('click', onImgClick, true)
     images[i].style.cursor = 'pointer'
   }
 }
