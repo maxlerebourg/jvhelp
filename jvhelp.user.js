@@ -52,8 +52,9 @@ function processIframe(linksElement, platform) {
       case 'instagram': {
         const link = l.getAttribute('href')
         if (!link.includes('/p/') && !link.includes('reel')) return
-        const videoId = link.replace(/https:\/\/www.instagram.com\/(reel|.+\/p)\/([^\/?&]+)(.*)?/, '$2')
+        const videoId = link.replace(/https:\/\/www.instagram.com\/(reel|.+\/p|p)\/([^\/?&]+)(.*)?/, '$2')
         if (!videoId) return
+        console.log(videoId)
         url = `https://www.instagram.com/p/${videoId}/embed/`
         break
       }
@@ -66,7 +67,6 @@ function processIframe(linksElement, platform) {
         } else if (youtubeUrl.indexOf('youtube.com/watch') !== -1) {
             videoId = youtubeUrl.match(/v=([^&]+)/)?.[1]
         } else if (youtubeUrl.indexOf('youtube.com/shorts') !== -1) {
-            console.log(youtubeUrl)
             videoId = youtubeUrl.replace(/https:\/\/(www\.|m\.)?youtube.com\/shorts\/([^\/?&]+)(.*)?/, '$2')
         }
         if (!videoId) return
