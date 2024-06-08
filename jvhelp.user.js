@@ -15,10 +15,13 @@ const messageClass = isJva ? 'card-message' : 'bloc-message-forum'
 
 // LinkOpener
 const tagLinkOpener = 'jvhelp-link-opener'
-const youtubeLinksSelector = 'a[href^="https://youtube.com"], a[href^="https://www.youtube.com"], a[href^="https://m.youtube.com"], a[href^="https://youtu.be"]'
-const twitterLinksSelector = 'a[href^="https://twitter.com/"], a[href^="https://x.com/"]'
-const tiktokLinksSelectors = 'a[href^="https://www.tiktok.com/"], a[href^="https://vm.tiktok.com/"]'
-const defaultLinksSelector = 'a[href^="https://streamable.com/"], a[href^="https://webmshare.com/"], a[href^="https://vocaroo.com/"], a[href^="https://voca.ro/"]'
+const selectors = {
+  youtube: 'a[href^="https://youtube.com"], a[href^="https://www.youtube.com"], a[href^="https://m.youtube.com"], a[href^="https://youtu.be"]',
+  twitter: 'a[href^="https://twitter.com/"], a[href^="https://x.com/"]',
+  tiktok: 'a[href^="https://www.tiktok.com/"], a[href^="https://vm.tiktok.com/"]',
+  instagram: 'a[href^="https://www.instagram.com/"]',
+  default: 'a[href^="https://streamable.com/"], a[href^="https://webmshare.com/"], a[href^="https://vocaroo.com/"], a[href^="https://voca.ro/"]',
+}
 
 function processIframe(linksElement, platform) {
   linksElement.forEach((l) => {
@@ -44,6 +47,14 @@ function processIframe(linksElement, platform) {
         } else if (link.includes('video')) {
           url = link.replace(/https:\/\/www.tiktok.com\/(.+)\/video\/([^\/?&]+)(.*)?/, 'https://vm.dstn.to/$1/video/$2')
         }
+        break
+      }
+      case 'instagram': {
+        const link = l.getAttribute('href')
+        if (!link.includes('/p/') && !link.includes('reel')) return
+        const videoId = link.replace(/https:\/\/www.instagram.com\/(reel|.+\/p)\/([^\/?&]+)(.*)?/, '$2')
+        if (!videoId) return
+        url = `https://www.instagram.com/p/${videoId}/embed/`
         break
       }
       case 'youtube': {
@@ -89,14 +100,9 @@ function onLinkOpener() {
   }
   const messages = document.getElementsByClassName(messageClass)
   for (let i = 0; i < messages.length; i += 1) {
-    processIframe(messages[i].querySelectorAll(twitterLinksSelector), 'twitter')
-    processIframe(messages[i].querySelectorAll(tiktokLinksSelectors), 'tiktok')
-    processIframe(messages[i].querySelectorAll(youtubeLinksSelector), 'youtube')
-    processIframe(messages[i].querySelectorAll(defaultLinksSelector))
+    Object.entries(selectors).map(([k, v]) => processIframe(messages[i].querySelectorAll(v), k))
   }
 }
-function onSetupLinkOpener() {
-  }
 
 
 // NoReload
@@ -136,7 +142,6 @@ async function onNextPage(entries) {
   title.innerText = `Page ${page}`
   title.style = 'padding: 1rem; font-size: 1.3rem; font-weight: bold'
   messages[lastIndex].insertAdjacentElement('afterend', title)
-
   isLoading = false
 }
 
