@@ -85,7 +85,7 @@ function processIframe(linksElement, platform) {
 }
 function onLinkOpener() {
   if (!document.getElementById(tagLinkOpener)) {
-    document.head.innerHTML = document.head.innerHTML + `<style id="${tagLinkOpener}">.iframe-jvhelp {border: none; max-width: 550px; margin: 0 auto .9375rem; }</style>`
+    document.head.insertAdjacentHTML('afterbegin', `<style id="${tagLinkOpener}">.iframe-jvhelp {border: none; max-width: 550px; margin: 0 auto .9375rem; }</style>`)
   }
   const messages = document.getElementsByClassName(messageClass)
   for (let i = 0; i < messages.length; i += 1) {
@@ -95,6 +95,8 @@ function onLinkOpener() {
     processIframe(messages[i].querySelectorAll(defaultLinksSelector))
   }
 }
+function onSetupLinkOpener() {
+  }
 
 
 // NoReload
@@ -149,29 +151,34 @@ function onNoReload() {
 
 // ImageOpener
 const tagImageOpener = 'jvhelp-image-opener'
+const tagImageOpenerDialog = 'jvhelp-image-opener-dialog'
 const classImageOpenerProcessed = 'jvhelp-image-opener-processed'
 async function onImgClick(event) {
   event.stopPropagation()
   event.preventDefault()
+  let dialog = document.getElementById(tagImageOpenerDialog)
+  if (!dialog) {
+    const element = document.createElement('dialog')
+    element.setAttribute('id', tagImageOpenerDialog)
+    element.addEventListener('click', () => element.close(), true)
+    document.body.insertAdjacentElement('afterbegin', element)
+    dialog = element
+  }
   const element = document.createElement('img')
   element.setAttribute('id', classImageOpenerProcessed)
   element.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
-  const dialog = document.getElementById(tagImageOpener)
+  console.log(dialog)
   dialog.replaceChildren(element)
   dialog.showModal()
 }
 
 function onImageOpener() {
-  const dialog = document.getElementById(tagImageOpener)
-  if (!dialog) {
-    document.body.innerHTML = document.body.innerHTML + `
-    <dialog id="${tagImageOpener}"></dialog>
-    <style>
-      #${tagImageOpener} { cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
+  if (!document.getElementById(tagImageOpener)) {
+    document.head.insertAdjacentHTML('afterbegin', `<style id="${tagImageOpener}">
+      #${tagImageOpenerDialog} { pointer-events: none; opacity: 0; overflow: hidden; cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
+      #${tagImageOpenerDialog}[open] { pointer-events: auto; opacity: 1; visibility: visible; }
       #${classImageOpenerProcessed} { max-height: 80vh; max-width: 80vw; object-fit: contain; }
-    </style>`
-    const dialog = document.getElementById(tagImageOpener)
-    dialog.addEventListener('click', dialog.close, { capture: true, passive: true })
+    </style>`)
   }
   const images = document.getElementsByTagName('img')
   for (let i = 0; i < images.length; i += 1) {
