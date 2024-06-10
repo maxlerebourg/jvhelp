@@ -52,7 +52,7 @@ function processIframe(linksElement, platform) {
       case 'instagram': {
         const link = l.getAttribute('href')
         if (!link.includes('/p/') && !link.includes('reel')) return
-        const videoId = link.replace(/https:\/\/www.instagram.com\/(reel|.+\/p|p)\/([^\/?&]+)(.*)?/, '$2')
+        const videoId = link.replace(/https:\/\/www.instagram.com\/(reels?|.+\/p|p)\/([^\/?&]+)(.*)?/, '$2')
         if (!videoId) return
         console.log(videoId)
         url = `https://www.instagram.com/p/${videoId}/embed/`
