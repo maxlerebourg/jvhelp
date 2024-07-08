@@ -52,7 +52,7 @@ function processIframe(linksElement, platform) {
       case 'instagram': {
         const link = l.getAttribute('href')
         if (!link.includes('/p/') && !link.includes('reel')) return
-        const videoId = link.replace(/https:\/\/www.instagram.com\/(reels?|.+\/p|p)\/([^\/?&]+)(.*)?/, '$2')
+        const videoId = link.replace(/https:\/\/www.instagram.com\/(reel|.+\/p|p)\/([^\/?&]+)(.*)?/, '$2')
         if (!videoId) return
         console.log(videoId)
         url = `https://www.instagram.com/p/${videoId}/embed/`
@@ -206,11 +206,19 @@ async function on410Redirect() {
   }
 }
 
+// MRedirect
+async function onMRedirect() {
+  if (document.location.href.includes('m.jeuxvideo.com')) {
+    window.location.href = window.location.href.replace('m.jeuxvideo.com', 'www.jeuxvideo.com')
+  }
+}
+
 
 //SetUp
 function onChange() {
   onImageOpener()
   onNoReload()
+  onMRedirect()
   on410Redirect()
   onLinkOpener()
 }
