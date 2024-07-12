@@ -11,7 +11,86 @@
 
 const isJva = document.location.href.includes('jvarchive')
 const messageClass = isJva ? 'card-message' : 'bloc-message-forum'
+const cssGhost = `
+spoiler .contenu-spoil {
+  text-align: left;
+  background: #ffecec;
+  border: 0.0625rem solid #fdd;
+  padding: 0.625rem;
+  display: none;
+}
+spoiler button {
+  border: none;
+  line-height: 1.5rem;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  margin-bottom: 0.3125rem;
+}
+spoiler .txt-spoil {
+  width: 4.6875rem;
+  font-size: 0.9285em;
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  background: #d90000;
+  font-weight: 700;
+  display: block;
+  font-family: Tahoma,"Trebuchet MS",sans-serif;
+}
+spoiler .aff-spoil,
+spoiler .masq-spoil {
+  color: #c40;
+  font-size: 0.9285em;
+  font-weight: 700;
+  display: block;
+  margin-left: 1rem;
+}
+spoiler .masq-spoil {
+  display: none;
+}
+spoiler[data-visible] > .contenu-spoil {
+  display: block;
+  overflow: hidden;
+}
+spoiler[data-visible] > button .aff-spoil {
+  display: none;
+}
+spoiler[data-visible] .masq-spoil {
+  display: block;
+}
+spoiler[inline][data-visible] > .contenu-spoil {
+  display: inline;
+}
+spoiler[inline] > .contenu-spoil {
+  padding: 0.1875rem;
+  border: 0;
+  background: #ffecec;
+}
+spoiler[inline] .aff-spoil,
+spoiler[inline] .masq-spoil {
+  display: none !important;
+}
 
+.newItem {
+  opacity: 0;
+  transform: rotateX(-90deg);
+  animation: grow 0.5s ease-in-out forwards;
+}
+
+@keyframes grow {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bloc-pre-right {
+  flex-wrap: wrap;
+  row-gap: 0.625rem;
+  column-gap: 0.3125rem;
+  display: flex;
+}
+`
 
 // LinkOpener
 const tagLinkOpener = 'jvhelp-link-opener'
@@ -106,6 +185,7 @@ function onLinkOpener() {
 
 
 // NoReload
+const tagNewPage = 'jvhelp-new-page'
 const observer = new IntersectionObserver(onNextPage)
 let currentUrl
 let startPage
@@ -120,7 +200,6 @@ function init() {
   isLoading = false
   isLastPage = false
 }
-
 async function onNextPage(entries) {
   if (page > startPage + 8 || isLastPage || isLoading || !entries.some(({ isIntersecting }) => isIntersecting)) return
   page += 1
@@ -138,10 +217,7 @@ async function onNextPage(entries) {
   for (let i = newMessages.length - 1; i >= 0; i -= 1) {
     messages[lastIndex].insertAdjacentElement('afterend', newMessages[i])
   }
-  const title = document.createElement('p')
-  title.innerText = `Page ${page}`
-  title.style = 'padding: 1rem; font-size: 1.3rem; font-weight: bold'
-  messages[lastIndex].insertAdjacentElement('afterend', title)
+  messages[lastIndex].insertAdjacentHTML('afterend', `<p class="${tagNewPage}" style="padding: 1rem; font-size: 1.3rem; font-weight: bold">Page ${page}</p>`)
   isLoading = false
 }
 
@@ -151,6 +227,87 @@ function onNoReload() {
   if (currentUrl !== document.location.href) init()
   observer.disconnect()
   observer.observe(messages[messages.length - 1])
+}
+
+
+// JVGhost
+const tagLinkGhost = 'jvhelp-ghost'
+let loadedPage = 0
+let currentPage
+let topicId
+let startMessageId
+let lastMessageId
+function onJvGhost() {
+  if (!document.location.href.includes('jeuxvideo.com/forums/42-51-')) return
+  if (!document.getElementById(tagLinkGhost)) {
+    document.head.insertAdjacentHTML('afterbegin', `<style id="${tagLinkGhost}">${cssGhost}</style>`)
+  }
+  if (!topicId) {
+    const regexPageUrlResult = window.location.href.match(/forums\/42-51-([0-9]+)-([0-9]+)/)
+    topicId = Number(regexPageUrlResult[1])
+    currentPage = Number(regexPageUrlResult[2]) + 1
+    onGhost()
+  }
+  const pageLength = document.getElementsByClassName(tagNewPage).length
+  if (loadedPage !== pageLength) {
+    loadedPage = pageLength
+    currentPage += 1
+    onGhost()
+  }
+}
+async function onGhost() {
+  const conteneurMessages = document.querySelector('#forum-main-col')
+  if (!conteneurMessages) return
+
+  const messagesNodes = document.querySelectorAll('div.bloc-message-forum')
+  const messagesMapById = new Map()
+  for (let i = 0; i < messagesNodes.length; i += 1) {
+    messagesMapById.set(Number(messagesNodes[i].dataset.id), messagesNodes[i])
+  }
+
+  const pageSuivanteRequestResult = await (await fetch(document.location.href.replace(/\/forums\/42-51-([0-9]+)-([0-9]+)/, `/forums/42-51-$1-${currentPage}`))).text()
+  const regexFirstPostResult = pageSuivanteRequestResult.match(/<span id="post_(\d*)" class="bloc-message-forum-anchor">/)
+  if (regexFirstPostResult) messagesMapById.set(Number(regexFirstPostResult[1]), null)
+
+  const messagesIds = Array.from(messagesMapById.keys())
+
+  const queryUrl = new URL(`https://jvarchive.com/api/topics/${topicId}/messages`)
+  let append = startMessageId ? false : true
+  startMessageId = lastMessageId ?? messagesIds[0]
+  lastMessageId = messagesIds[messagesIds.length - 1]
+  queryUrl.searchParams.set('fromMessageId', startMessageId)
+  queryUrl.searchParams.set('toMessageId', lastMessageId)
+  messagesIds.map((id) => {
+    if (id === startMessageId) append = true
+    if (append) queryUrl.searchParams.append('excludeIds', id)
+  })
+
+  const { messages: deletedMessages } = await (await fetch(queryUrl.href)).json()
+  if (!deletedMessages || !deletedMessages.length) return
+
+  // Insertion des messages supprimés dans la page
+  let i = 0
+  let deletedMessagesIndex = 0
+  while (i < messagesIds.length - 1) {
+    if (deletedMessages.length === deletedMessagesIndex) break
+    const deletedMessage = deletedMessages[deletedMessagesIndex]
+    if (
+      deletedMessage.id > messagesIds[i] &&
+      deletedMessage.id < messagesIds[i + 1]
+    ) {
+      const deletedMessageNode = messagesNodes[0].cloneNode([true])
+      deletedMessageNode.style = "background: red;"
+      deletedMessageNode.getElementsByClassName('user-avatar-msg')[0].src = deletedMessage.auteur.avatar
+      deletedMessageNode.getElementsByClassName('bloc-date-msg')[0].innerHTML = new Date(deletedMessage.date_post).toLocaleString('fr-FR')
+      deletedMessageNode.getElementsByClassName('bloc-pseudo-msg')[0].innerHTML = deletedMessage.auteur.pseudo
+      deletedMessageNode.getElementsByClassName('txt-msg')[0].innerHTML = deletedMessage.texte
+      messagesMapById.get(messagesIds[i])?.after(deletedMessageNode)
+      messagesMapById.set(deletedMessage.id, deletedMessageNode)
+      messagesIds.splice(i + 1, 0, deletedMessage.id)
+      deletedMessagesIndex += 1
+    }
+    i += 1
+  }
 }
 
 
@@ -221,6 +378,7 @@ function onChange() {
   onMRedirect()
   on410Redirect()
   onLinkOpener()
+  onJvGhost()
 }
 
 document.body.addEventListener('DOMNodeInserted', onChange, false)
