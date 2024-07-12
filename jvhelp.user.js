@@ -12,6 +12,23 @@
 const isJva = document.location.href.includes('jvarchive')
 const messageClass = isJva ? 'card-message' : 'bloc-message-forum'
 const cssGhost = `
+.jvhelp-message-deleted {
+  background: #442727 !important;
+}
+.theme-light .jvhelp-message-deleted {
+  background: #ffd6e0 !important;
+}
+.jvhelp-message-deleted .signature-msg {
+  display: none;
+}
+
+.bloc-pre-right {
+  flex-wrap: wrap;
+  row-gap: 0.625rem;
+  column-gap: 0.3125rem;
+  display: flex;
+}
+
 spoiler .contenu-spoil {
   text-align: left;
   background: #ffecec;
@@ -70,25 +87,6 @@ spoiler[inline] > .contenu-spoil {
 spoiler[inline] .aff-spoil,
 spoiler[inline] .masq-spoil {
   display: none !important;
-}
-
-.newItem {
-  opacity: 0;
-  transform: rotateX(-90deg);
-  animation: grow 0.5s ease-in-out forwards;
-}
-
-@keyframes grow {
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.bloc-pre-right {
-  flex-wrap: wrap;
-  row-gap: 0.625rem;
-  column-gap: 0.3125rem;
-  display: flex;
 }
 `
 
@@ -296,7 +294,7 @@ async function onGhost() {
       deletedMessage.id < messagesIds[i + 1]
     ) {
       const deletedMessageNode = messagesNodes[0].cloneNode([true])
-      deletedMessageNode.style = "background: red;"
+      deletedMessageNode.classList.add('jvhelp-message-deleted')
       deletedMessageNode.getElementsByClassName('user-avatar-msg')[0].src = deletedMessage.auteur.avatar
       deletedMessageNode.getElementsByClassName('bloc-date-msg')[0].innerHTML = new Date(deletedMessage.date_post).toLocaleString('fr-FR')
       deletedMessageNode.getElementsByClassName('bloc-pseudo-msg')[0].innerHTML = deletedMessage.auteur.pseudo
