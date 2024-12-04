@@ -1,8 +1,6 @@
 // ==UserScript==
 // @name         JvHelp
 // @version      2024-01-08
-// @description  try to take over the world!
-// @author       You
 // @match        https://jeuxvideo.com/*
 // @match        https://*.jeuxvideo.com/*
 // @match        https://jvarchive.com/*
@@ -10,7 +8,7 @@
 // ==/UserScript==
 
 const isJva = document.location.href.includes('jvarchive')
-const messageClass = isJva ? 'card-message' : 'bloc-message-forum'
+const messageSelectors = 'div.card-message, div.bloc-message-forum, div[id^="post_"]'
 const cssGhost = `
 .jvhelp-message-deleted {
   background: #442727 !important;
@@ -175,7 +173,7 @@ function onLinkOpener() {
   if (!document.getElementById(tagLinkOpener)) {
     document.head.insertAdjacentHTML('afterbegin', `<style id="${tagLinkOpener}">.iframe-jvhelp {border: none; max-width: 550px; margin: 0 auto .9375rem; }</style>`)
   }
-  const messages = document.getElementsByClassName(messageClass)
+  const messages = document.querySelectorAll(messageSelectors)
   for (let i = 0; i < messages.length; i += 1) {
     Object.entries(selectors).map(([k, v]) => processIframe(messages[i].querySelectorAll(v), k))
   }
@@ -202,15 +200,14 @@ async function onNextPage(entries) {
   if (page > startPage + 8 || isLastPage || isLoading || !entries.some(({ isIntersecting }) => isIntersecting)) return
   page += 1
   isLoading = true
-
   const html = new DOMParser().parseFromString(await (await fetch(document.location.href.replace(
     /forums\/([0-9]+)-([0-9]+)-([0-9]+)-([0-9]+)/,
     `forums/$1-$2-$3-${page}`
   ), { redirect: 'manual' })).text(), 'text/html')
-  const newMessages = html.getElementsByClassName(messageClass)
+  const newMessages = html.querySelectorAll(messageSelectors)
   if (newMessages.length === 0) return
   if (newMessages.length !== 20) isLastPage = true
-  const messages = document.getElementsByClassName(messageClass)
+  const messages = document.querySelectorAll(messageSelectors)
   const lastIndex = messages.length - 1
   for (let i = newMessages.length - 1; i >= 0; i -= 1) {
     messages[lastIndex].insertAdjacentElement('afterend', newMessages[i])
@@ -220,7 +217,8 @@ async function onNextPage(entries) {
 }
 
 function onNoReload() {
-  const messages = document.getElementsByClassName(messageClass)
+  const messages = document.querySelectorAll(messageSelectors)
+  console.log(messages[0]?.id)
   if (!messages.length || isLastPage) return
   if (currentUrl !== document.location.href) init()
   observer.disconnect()
@@ -327,7 +325,6 @@ async function onImgClick(event) {
   const element = document.createElement('img')
   element.setAttribute('id', classImageOpenerProcessed)
   element.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
-  console.log(dialog)
   dialog.replaceChildren(element)
   dialog.showModal()
 }
