@@ -5,10 +5,15 @@
 // @match        https://*.jeuxvideo.com/*
 // @match        https://jvarchive.com/*
 // @match        https://*.jvarchive.com/*
+// @match        https://jvarchive.st/*
+// @match        https://*.jvarchive.st/*
+// @match        https://jeuxvideo.to/*
+// @match        https://*.jeuxvideo.to/*
+// @match        https://boucling.com/*
+// @match        https://*.boucling.com/*
 // ==/UserScript==
 
-const isJva = document.location.href.includes('jvarchive')
-const messageSelectors = 'div.card-message, div.bloc-message-forum, div[id^="post_"]'
+const messageSelectors = 'div.card-message, div.bloc-message-forum, div[id^="post_"], div.mantine-Paper-root'
 const cssGhost = `
 .jvhelp-message-deleted {
   background: #442727 !important;
@@ -152,7 +157,7 @@ function processIframe(linksElement, platform) {
         url = l.getAttribute('href')
           .replace(/https:\/\/streamable.com\/([^\/?&]+)(.*)?/, 'https://streamable.com/e/$1')
           .replace(/https:\/\/voca(.ro|roo.com)\/([^\/?&]+)(.*)?/, 'https://vocaroo.com/embed/$2')
-          .replace(/https:\/\/webmshare.com\/([^\/?&]+)(.*)?/, 'https://webmshare.com/play/$1')
+          .replace(/https:\/\/webmshare.com\/([^\/?&]+)(.*)?/, 'https://webmshare.com/play/$2')
         break
       }
     }
