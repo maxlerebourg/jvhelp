@@ -102,7 +102,6 @@ const selectors = {
   instagram: 'a[href^="https://www.instagram.com/"]',
   default: 'a[href^="https://streamable.com/"], a[href^="https://webmshare.com/"], a[href^="https://vocaroo.com/"], a[href^="https://voca.ro/"]',
 }
-
 function processIframe(linksElement, platform) {
   linksElement.forEach((l) => {
     if (l.closest('.signature-msg')) return
@@ -220,12 +219,11 @@ async function onNextPage(entries) {
   messages[lastIndex].insertAdjacentHTML('afterend', `<p class="${tagNewPage}" style="padding: 1rem; font-size: 1.3rem; font-weight: bold">Page ${page}</p>`)
   isLoading = false
 }
-
 function onNoReload() {
   const messages = document.querySelectorAll(messageSelectors)
   console.log(messages[0]?.id)
-  if (!messages.length || isLastPage) return
   if (currentUrl !== document.location.href) init()
+  if (!messages.length || isLastPage) return
   observer.disconnect()
   observer.observe(messages[messages.length - 1])
 }
@@ -321,24 +319,22 @@ async function onImgClick(event) {
   event.preventDefault()
   let dialog = document.getElementById(tagImageOpenerDialog)
   if (!dialog) {
-    const element = document.createElement('dialog')
-    element.setAttribute('id', tagImageOpenerDialog)
-    element.addEventListener('click', () => element.close(), true)
-    document.body.insertAdjacentElement('afterbegin', element)
-    dialog = element
+    const newDialog = document.createElement('dialog')
+    newDialog.setAttribute('id', tagImageOpenerDialog)
+    newDialog.addEventListener('click', () => newDialog.close(), true)
+    document.body.insertAdjacentElement('afterbegin', newDialog)
+    dialog = newDialog
   }
-  const element = document.createElement('img')
-  element.setAttribute('id', classImageOpenerProcessed)
-  element.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
-  dialog.replaceChildren(element)
+  const img = document.createElement('img')
+  img.setAttribute('id', classImageOpenerProcessed)
+  img.setAttribute('src', event.target.alt.replace(/www.noelshack.com\/([0-9]{4})-([0-9]{2})-([0-9]{1,2})-/, 'image.noelshack.com/fichiers/$1/$2/$3/'))
+  dialog.replaceChildren(img)
   dialog.showModal()
 }
-
 function onImageOpener() {
   if (!document.getElementById(tagImageOpener)) {
     document.head.insertAdjacentHTML('afterbegin', `<style id="${tagImageOpener}">
-      #${tagImageOpenerDialog} { pointer-events: none; opacity: 0; overflow: hidden; cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
-      #${tagImageOpenerDialog}[open] { pointer-events: auto; opacity: 1; visibility: visible; }
+      #${tagImageOpenerDialog} { overflow: hidden; cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
       #${classImageOpenerProcessed} { max-height: 80vh; max-width: 80vw; object-fit: contain; }
     </style>`)
   }
@@ -349,7 +345,6 @@ function onImageOpener() {
     if (!images[i].src.includes('noelshack.com')) continue
     images[i].classList.add(classImageOpenerProcessed)
     images[i].addEventListener('click', onImgClick, true)
-    images[i].style.cursor = 'pointer'
   }
 }
 
