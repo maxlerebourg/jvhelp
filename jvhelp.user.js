@@ -143,11 +143,11 @@ function processIframe(linksElement, platform) {
         const timestamp = youtubeUrl.match(/t=([^&]+)/)?.[1]
         let videoId
         if (youtubeUrl.indexOf('youtu.be') !== -1) {
-            videoId = youtubeUrl.replace(/https:\/\/youtu.be\/([^\/?&]+)(.*)?/, '$1')
+          videoId = youtubeUrl.replace(/https:\/\/youtu.be\/([^\/?&]+)(.*)?/, '$1')
         } else if (youtubeUrl.indexOf('youtube.com/watch') !== -1) {
-            videoId = youtubeUrl.match(/v=([^&]+)/)?.[1]
+          videoId = youtubeUrl.match(/v=([^&]+)/)?.[1]
         } else if (youtubeUrl.indexOf('youtube.com/shorts') !== -1) {
-            videoId = youtubeUrl.replace(/https:\/\/(www\.|m\.)?youtube.com\/shorts\/([^\/?&]+)(.*)?/, '$2')
+          videoId = youtubeUrl.replace(/https:\/\/(www\.|m\.)?youtube.com\/shorts\/([^\/?&]+)(.*)?/, '$2')
         }
         if (!videoId) return
         url = `https://www.youtube.com/embed/${videoId}?start=${timestamp?.replace('s', '') ?? '0'}`
@@ -381,6 +381,7 @@ function onChange() {
   onJvGhost()
 }
 
-document.body.addEventListener('DOMNodeInserted', onChange, false)
-document.body.addEventListener('DOMNodeRemoved', onChange, false)
-document.addEventListener('load', onChange, false)
+new MutationObserver(onChange).observe(
+  document.body,
+  { subtree: true, characterData: true, childList: true }
+)
