@@ -334,7 +334,8 @@ async function onImgClick(event) {
 function onImageOpener() {
   if (!document.getElementById(tagImageOpener)) {
     document.head.insertAdjacentHTML('afterbegin', `<style id="${tagImageOpener}">
-      #${tagImageOpenerDialog} { overflow: hidden; cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
+      #${tagImageOpenerDialog} { pointer-events: none; opacity: 0; overflow: hidden; cursor: pointer; padding: 0; border: none !important; display: flex; justify-content: center; align-items: center; }
+      #${tagImageOpenerDialog}[open] { pointer-events: auto; opacity: 1; visibility: visible; }
       #${classImageOpenerProcessed} { max-height: 80vh; max-width: 80vw; object-fit: contain; }
     </style>`)
   }
